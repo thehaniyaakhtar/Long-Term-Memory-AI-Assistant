@@ -11,7 +11,7 @@ import os
 load_dotenv()
 
 DATABASE_URL = os.getenv("DATABASE_URL")
-# Loads the .ebv file and gets the DATABASE_URL
+# Loads the .env file and gets the DATABASE_URL
 
 engine = create_engine(DATABASE_URL)
 # Creates the database engine
