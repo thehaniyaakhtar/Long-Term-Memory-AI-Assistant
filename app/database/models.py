@@ -1,4 +1,6 @@
-# Defining the memoties table in Python and creating it in PostgreSQL
+# Defining the memories table in Python and creating it in PostgreSQL
+
+# importing the tupes needed to create database columns
 from sqlalchemy import (
     Column,
     Integer,
@@ -6,8 +8,9 @@ from sqlalchemy import (
     DateTime
 )
 
-from datetime import datetime
+from datetime import datetime, timezone
 from app.database.base import Base
+# Imports the base class that all database models use
 
 class Memory(Base):
     __tablename__ = "memories"
@@ -20,11 +23,11 @@ class Memory(Base):
     
     created_at = Column(
         DateTime,
-        default = datetime.utcnow
+        default = lambda: datetime.now(timezone.utc)
     )
     
     updated_at = Column(
         DateTime,
-        default = datetime.utcnow,
-        onupdate = datetime.utcnow
+        default = lambda: datetime.now(timezone.utc),
+        onupdate = lambda: datetime.now(timezone.utc)
     )
