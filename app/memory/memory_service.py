@@ -1,5 +1,6 @@
 from app.database.models import Memory
 
+# creating a new memory
 def create_memory(
     db, 
     user_id,
@@ -16,11 +17,11 @@ def create_memory(
     
     db.add(memory),
     db.commit(),
-    db.refresh(memory)
+    db.refresh(memory) # Refreshes it to get generated values like id and timestamps
     
     return (memory)
 
-def get_all_memories(db, user_id):
+def get_all_memories(db, user_id): # Read all memories belonging to specific user
     return db.query(Memory).filter(
         Memory.user_id == user_id
     ).all()
