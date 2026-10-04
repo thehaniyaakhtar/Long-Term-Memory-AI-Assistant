@@ -1,7 +1,11 @@
 from fastapi import FastAPI, Depends
+# SQLA session is used to communicate with the database
 from sqlalchemy.orm import Session
 
+# SessionLocal creates db sessions
 from app.database.database import SessionLocal
+
+# Databse operations for memories
 from app.memory.memory_service import (
     create_memory,
     get_all_memories,
@@ -9,18 +13,24 @@ from app.memory.memory_service import (
     update_memory,
     delete_memory
 )
-from app.memory.schemas import MemoryCreate
+# Pydantic schemas, used to validate incoming API data
+from app.memory.schemas import MemoryCreate, MemoryUpdate
 
+
+# Creating the application via object that defines API
 app = FastAPI(
     title = "Long Term Memory AI Assistant"
 )
 
+# Function that creates a database session for each API request
 def get_db():
     db = SessionLocal()
     
     try: 
+        # Function that creates a database session for each API request
         yield db
     finally:
+        # Close application after request
         db.close()
         
         
@@ -30,14 +40,20 @@ def home():
         "message": "Long-Term Memory AI Assistant is running"
     }
     
-    
+# CREATING MEMORY
+# POST to create new data
+# /memories is the URL endpoint
 @app.post("/memories")
 
 def create_new_memory(
+    # FastAPI receives JSON fromm the request, validates it using MemoryCreate schema
     memory: MemoryCreate,
+    
+    # "give this function a database session"
     db: Session = Depends(get_db)
 ):
     
+    # Call service function to insert memory into the database
     new_memory = create_memory(
      db = db,
      user_id = memory.user_id,
@@ -46,6 +62,7 @@ def create_new_memory(
      importance_score = memory.importance_score   
     )
     
+    # return newly created memory as JSON
     return {
         "id": new_memory.id,
         "memory_text": new_memory.memory_text,
@@ -53,16 +70,22 @@ def create_new_memory(
         "importance_score": new_memory.importance_score
     }
 
+
+# GET ALL MEMORIES FOR A USER
+
+
 @app.get("/memories/{user_id}")
 def get_memories(
     user_id: int,
     db: Session = Depends(get_db)
 ):
+    # memories ask the server to find all memories
     memories = get_all_memories(
         db = db,
         user_id = user_id
     )
     
+    # converting database objects into JSON dictionaries
     return [
         {
             "id": memory.id,
@@ -72,7 +95,9 @@ def get_memories(
         }
         for memory in memories
     ]
-    
+  
+# for user_id, 
+# find one memory using memory and user id  
 @app.get("/memory/{memory_id}")
 def get_single_memory(
     memory_id: int,
@@ -85,9 +110,11 @@ def get_single_memory(
         user_id=user_id
     )
 
+    # if nothing was found, return error
     if memory is None:
         return {"error": "Memory not found"}
 
+    # return memory as JSON
     return {
         "id": memory.id,
         "memory_text": memory.memory_text,
@@ -96,6 +123,7 @@ def get_single_memory(
     }
 
 
+# Updating memory
 @app.put("/memory/{memory_id}")
 def update_single_memory(
     memory_id: int,
@@ -103,6 +131,7 @@ def update_single_memory(
     memory: MemoryUpdate,
     db: Session = Depends(get_db)
 ):
+    # Send updated informationn to the service layer
     updated_memory = update_memory(
         db=db,
         memory_id=memory_id,
