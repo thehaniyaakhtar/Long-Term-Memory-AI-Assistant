@@ -1,16 +1,22 @@
+# Import tools needed to connect to Qdrant
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams
 
+# Python program to your local Qdrant server
 client = QdrantClient(
     host = "localhost",
     port = 6333
 )
 
+# name of collection
 COLLECTION_NAME = "memories"
 
+# defines a function that creates the Qdrant collection
 def create_collection():
+    # gets all collections currently in Qdrant
     collections = client.get_collections().collections
     
+    # extract just their names
     existing_names = [
         collection.name
         for collection in collections
@@ -20,8 +26,10 @@ def create_collection():
         client.create_collection(
             collection_name = COLLECTION_NAME,
             vectors_config = VectorParams(
+                # each embedding will have 384 numbers
                 size = 384,
                 distance = Distance.COSINE
+                # Qdrant will use cosine similarity to determine how similar 2 memories are
             )
         )
         
@@ -29,3 +37,4 @@ def create_collection():
         
     else:
         print("Collection already exists")
+        
