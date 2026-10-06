@@ -38,3 +38,34 @@ def create_collection():
     else:
         print("Collection already exists")
         
+        
+def store_memory_vector(
+    memory_id,
+    embedding
+):
+    client.upsert(
+        collection_name = COLLECTION_NAME,
+        points = [
+            {
+                "id": memory_id,
+                "vector": embedding,
+                "payload": {
+                    "memory_id" : memory_id
+                }
+            }
+        ]
+    )
+    
+    print("Memory vector stores in Qdrant")
+
+def search_memory_vectors(
+    query_embedding,
+    limit = 5
+):
+    results = client.query_points(
+        collection_name = COLLECTION_NAME,
+        query = query_embedding,
+        limit = limit
+    )
+    
+    return results.points
