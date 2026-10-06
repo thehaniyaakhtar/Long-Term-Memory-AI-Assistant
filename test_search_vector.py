@@ -3,7 +3,7 @@ from app.vector_store.qdrant import search_memory_vectors
 
 model = SentenceTransformer("all-MiniLM-L6-v2")
 
-query = "Wjat am I studying?"
+query = "What am I studying?"
 
 query_embedding = model.encode(query).tolist()
 
