@@ -10,3 +10,5 @@ class MemoryUpdate(BaseModel):
     memory_text: str | None = None
     memory_type: str | None = None
     importance_score: int | None = None
+    
+    
