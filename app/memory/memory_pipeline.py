@@ -3,11 +3,16 @@ from sentence_transformers import SentenceTransformer
 from app.memory.extraction_service import extract_memories
 from app.vector_store.qdrant import store_memory_vector
 from memory.memory_service import create_memory
+from app.memory.memory_decision import should_remember
 
 embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
 
 # receive user message ,coordinate with different components
 def process_message(db, user_id, user_message):
+    
+    if not should_remember(user_message):
+    return []
+
     extracted_memories = extract_memories(user_message)
     
     saved_memories = []
