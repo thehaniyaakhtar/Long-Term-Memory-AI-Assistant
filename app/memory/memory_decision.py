@@ -40,7 +40,7 @@ User message:
 """
     response = client.models.generate_content(
         model = "gemini-2.5-flash",
-        content = prompt
+        contents = prompt
     )
     
     answer = response.text.strip().upper()

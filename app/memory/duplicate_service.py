@@ -1,4 +1,6 @@
 from app.database.models import Memory
+from sentence_transformers import SentenceTransformer
+
 
 def find_similar_memory(
     db,
@@ -12,7 +14,7 @@ def find_similar_memory(
     model = SentenceTransformer("all-MiniLM-L6-v2")
     
     # Convert the memory into an embedding
-    embedding = model.emcode(
+    embedding = model.encode(
         memory_text
     ).tolist()
     
