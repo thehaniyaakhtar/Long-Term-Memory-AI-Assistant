@@ -17,6 +17,15 @@ from app.memory.memory_service import (
 from app.memory.schemas import MemoryCreate, MemoryUpdate
 
 
+from fastapi import UploadFile, File, HTTPException
+from pydantic import BaseModel
+
+from app.agent.chat_graph import chat_graph
+from app.memory.file_processing import (
+    extract_file_text,
+    save_file_memories
+)
+
 # Creating the application via object that defines API
 app = FastAPI(
     title = "Long Term Memory AI Assistant"
@@ -170,3 +179,71 @@ def delete_single_memory(
     return {
         "message": "Memory deleted successfully"
     }
+
+
+class ChatRequest(BaseModel):
+    user_id: int
+    question: str
+
+
+@app.post("/chat")
+def chat(request: ChatRequest):
+    result = chat_graph.invoke({
+        "user_id": request.user_id,
+        "question": request.question,
+        "memories": [],
+        "compressed_context": "",
+        "answer": ""
+    })
+
+    return {
+        "question": request.question,
+        "memories_used": result["memories"],
+        "answer": result["answer"]
+    }
+
+
+@app.post("/files/{user_id}")
+async def upload_file(
+    user_id: int,
+    file: UploadFile = File(...)
+):
+    filename = file.filename or ""
+
+    if not filename.lower().endswith((".txt", ".pdf")):
+        raise HTTPException(
+            status_code=400,
+            detail="Only TXT and PDF files are supported."
+        )
+
+    file_bytes = await file.read()
+
+    try:
+        text = extract_file_text(filename, file_bytes)
+
+        saved = save_file_memories(
+            user_id=user_id,
+            filename=filename,
+            file_text=text
+        )
+
+        return {
+            "filename": filename,
+            "chunks_saved": len(saved),
+            "memories": saved
+        }
+
+    except ValueError as error:
+        raise HTTPException(
+            status_code=400,
+            detail=str(error)
+        )
+
+    except Exception as error:
+        raise HTTPException(
+            status_code=500,
+            detail="File processing failed. Check the server logs."
+        ) from error
+
+    finally:
+        await file.close()
