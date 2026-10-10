@@ -1,5 +1,11 @@
-fastapi 
-uvicorn 
-sqlalchemy 
-psycopg2-binary 
+fastapi
+uvicorn
+sqlalchemy
+psycopg2-binary
 python-dotenv
+qdrant-client
+sentence-transformers
+google-genai
+langgraph
+python-multipart
+pypdf

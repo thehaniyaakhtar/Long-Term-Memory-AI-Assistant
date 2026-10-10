@@ -26,6 +26,9 @@ from app.memory.file_processing import (
     save_file_memories
 )
 
+from pathlib import Path
+from fastapi.staticfiles import StaticFiles
+
 # Creating the application via object that defines API
 app = FastAPI(
     title = "Long Term Memory AI Assistant"
@@ -247,3 +250,12 @@ async def upload_file(
 
     finally:
         await file.close()
+
+app.mount(
+    "/ui",
+    StaticFiles(
+        directory=Path(__file__).parent / "static",
+        html=True
+    ),
+    name="ui"
+)
