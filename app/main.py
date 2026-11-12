@@ -1,56 +1,42 @@
-from fastapi import FastAPI, Depends
-# SQLA session is used to communicate with the database
+from pathlib import Path
+
+from fastapi import Depends, FastAPI, File, HTTPException, UploadFile
+from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-# SessionLocal creates db sessions
-from app.database.database import SessionLocal
-
-# Databse operations for memories
+from app.agent.chat_graph import chat_graph
+from app.database.base import Base
+from app.database.database import SessionLocal, engine
+from app.memory.file_processing import extract_file_text, save_file_memories
 from app.memory.memory_service import (
     create_memory,
+    delete_memory,
     get_all_memories,
     get_memory,
     update_memory,
-    delete_memory
 )
-# Pydantic schemas, used to validate incoming API data
 from app.memory.schemas import MemoryCreate, MemoryUpdate
 
+app = FastAPI(title="Long Term Memory AI Assistant")
 
-from fastapi import UploadFile, File, HTTPException
-from pydantic import BaseModel
 
-from app.agent.chat_graph import chat_graph
-from app.memory.file_processing import (
-    extract_file_text,
-    save_file_memories
-)
+@app.on_event("startup")
+def startup_event():
+    Base.metadata.create_all(bind=engine)
 
-from pathlib import Path
-from fastapi.staticfiles import StaticFiles
 
-# Creating the application via object that defines API
-app = FastAPI(
-    title = "Long Term Memory AI Assistant"
-)
-
-# Function that creates a database session for each API request
 def get_db():
     db = SessionLocal()
-    
-    try: 
-        # Function that creates a database session for each API request
+    try:
         yield db
     finally:
-        # Close application after request
         db.close()
-        
-        
+
+
 @app.get("/")
 def home():
-    return{
-        "message": "Long-Term Memory AI Assistant is running"
-    }
+    return {"message": "Long-Term Memory AI Assistant is running"}
     
 # CREATING MEMORY
 # POST to create new data

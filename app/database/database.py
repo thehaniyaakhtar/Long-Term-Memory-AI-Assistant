@@ -1,24 +1,23 @@
-# creating an engine to connect to PostgreSQL
+from __future__ import annotations
 
-from sqlalchemy import create_engine
-# the engine that creates a database connection
-from sqlalchemy.orm import sessionmaker
-# sessionmaker, lets the app create database sessions to interact with PostgreSQL
-from dotenv import load_dotenv
-# Reads database URL from .env file
 import os
+
+from dotenv import load_dotenv
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 
 load_dotenv()
 
-DATABASE_URL = os.getenv("DATABASE_URL")
-# Loads the .env file and gets the DATABASE_URL
+DATABASE_URL = os.getenv("DATABASE_URL") or "sqlite:///./long_term_memory.db"
 
-engine = create_engine(DATABASE_URL)
-# Creates the database engine
+engine_kwargs = {}
+if DATABASE_URL.startswith("sqlite"):
+    engine_kwargs["connect_args"] = {"check_same_thread": False}
+
+engine = create_engine(DATABASE_URL, **engine_kwargs)
 
 SessionLocal = sessionmaker(
-    autocommit = False, # changes arent automatically saved
-    autoflush=False,    # SQLAl doesnt automatically send pending changes to db before certain queries
-    bind = engine       # which database to use
+    autocommit=False,
+    autoflush=False,
+    bind=engine,
 )
-# Creates a session factory called session local

@@ -9,3 +9,4 @@ google-genai
 langgraph
 python-multipart
 pypdf
+matplotlib
