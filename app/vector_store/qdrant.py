@@ -2,11 +2,21 @@
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams
 
-# Python program to your local Qdrant server
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
 client = QdrantClient(
-    host = "localhost",
-    port = 6333
+    url=os.getenv("QDRANT_URL"),
+    api_key=os.getenv("QDRANT_API_KEY")
 )
+
+# # Python program to your local Qdrant server
+# client = QdrantClient(
+#     host = "localhost",
+#     port = 6333
+# )
 
 # name of collection
 COLLECTION_NAME = "memories"
